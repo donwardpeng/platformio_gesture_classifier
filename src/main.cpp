@@ -29,7 +29,7 @@
 
 #include "model.h"
 
-const float accelerationThreshold = 2.5; // threshold of significant in G's
+const float accelerationThreshold = 2.75; // threshold of significant in G's
 const int numSamples = 119;
 
 int samplesRead = numSamples;
@@ -60,9 +60,15 @@ const char* GESTURES[] = {
 
 #define NUM_GESTURES (sizeof(GESTURES) / sizeof(GESTURES[0]))
 
+int led;
+int brightness;
+
 void setup() {
   Serial.begin(9600);
   while (!Serial);
+  led = LED_BUILTIN;
+  // Set the LED pin to output
+  pinMode(led, OUTPUT);
 
   // initialize the IMU
   if (!IMU.begin()) {
@@ -155,6 +161,14 @@ void loop() {
           Serial.println(tflOutputTensor->data.f[i], 6);
         }
         Serial.println();
+          // Calculate the brightness of the LED such that y=-1 is fully off
+          // and y=1 is fully on. The LED's brightness can range from 0-255.
+          brightness = brightness + 50;
+          led = LED_BUILTIN;
+          // Set the brightness of the LED. If the specified pin does not support PWM,
+          // this will result in the LED being on when y > 127, off otherwise.
+          analogWrite(led, brightness);
+
       }
     }
   }
