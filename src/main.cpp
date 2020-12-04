@@ -29,7 +29,7 @@
 
 #include "model.h"
 
-const float accelerationThreshold = 2.75; // threshold of significant in G's
+const float accelerationThreshold = 1.75; // threshold of significant in G's
 const int numSamples = 119;
 
 int samplesRead = numSamples;
@@ -157,10 +157,27 @@ void loop() {
         }
 
         // Loop through the output tensor values from the model
+        float maxProb = 0;
+        int maxIndex = 0;
+        for (int i = 0; i < NUM_GESTURES; i++){
+        if (tflOutputTensor->data.f[i] > maxProb) {
+          maxIndex = i;
+          maxProb = tflOutputTensor->data.f[i];
+          }
+        }
+
         for (int i = 0; i < NUM_GESTURES; i++) {
+          char prefix = ' '; 
+          if(i == maxIndex){
+            prefix = '*';
+          }
+          Serial.print(prefix);
           Serial.print(GESTURES[i]);
           Serial.print(": ");
-          Serial.println(tflOutputTensor->data.f[i], 6);
+          float percentage = tflOutputTensor->data.f[i] * 100.0;
+          Serial.print(percentage, 2);
+          Serial.println(" %");
+          // Serial.println(tflOutputTensor->data.f[i], 6);
         }
         Serial.println();
           // Calculate the brightness of the LED such that y=-1 is fully off
